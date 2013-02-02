@@ -1,0 +1,8 @@
+# Vim
+*.swp
+
+# Build
+tmp/
+memorygame
+Makefile
+
