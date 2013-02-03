@@ -3,8 +3,8 @@
 #include <QtGui/QVBoxLayout>
 #include "mainwindow.h"
 
-const int WIDTH = 6;
-const int HEIGHT = 6;
+const int WIDTH = 3;
+const int HEIGHT = 4;
 
 MemoryWidget::MemoryWidget(QWidget * parent)
 	: QWidget(parent), view(0), opened(WIDTH * HEIGHT, false), table(WIDTH * HEIGHT, QChar())
@@ -43,7 +43,16 @@ MemoryWidget::MemoryWidget(QWidget * parent)
 
 	for(int x = 0; x < WIDTH; ++x) {
 		for(int y = 0; y < HEIGHT; ++y) {
-			view->setItem(y, x, new QTableWidgetItem(table[x + y * WIDTH]));
+			view->setItem(y, x, new QTableWidgetItem());
+		}
+	}
+	for(int x = 0; x < WIDTH; ++x) {
+		for(int y = 0; y < HEIGHT; ++y) {
+			if(opened[x + y * WIDTH]) {
+				view->item(y, x)->setText(table[x + y * WIDTH]);
+			} else {
+				view->item(y, x)->setText("");
+			}
 		}
 	}
 }
@@ -54,5 +63,41 @@ MemoryWidget::~MemoryWidget()
 
 void MemoryWidget::turnOver(int row, int column)
 {
+	if(!opened[column + row * WIDTH]) {
+		opened[column + row * WIDTH] = true;
+	}
+
+	QList<QChar> paired;
+	QList<QChar> unpaired;
+	for(int i = 0; i < table.size(); ++i) {
+		if(opened[i]) {
+			QChar ch = table[i];
+			if(unpaired.contains(ch)) {
+				unpaired.removeAt(unpaired.indexOf(ch));
+				paired << ch;
+			} else {
+				unpaired << ch;
+			}
+		}
+	}
+	if(paired.size() == table.size() / 2) {
+		view->setEnabled(false);
+	}
+
+	if(unpaired.size() > 1) {
+		for(int i = 0; i < table.size(); ++i) {
+			opened[i] = false;
+		}
+	}
+
+	for(int x = 0; x < WIDTH; ++x) {
+		for(int y = 0; y < HEIGHT; ++y) {
+			if(opened[x + y * WIDTH]) {
+				view->item(y, x)->setText(table[x + y * WIDTH]);
+			} else {
+				view->item(y, x)->setText("");
+			}
+		}
+	}
 }
 
